@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * @author 张忠振
@@ -34,7 +35,11 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     public String getAllUsers() {
 
         List<Users> usersList = usersMapper.getAllUsers();
-        return "";
+        StringJoiner stringJoiner = new StringJoiner(" || ");
+        for (Users users : usersList) {
+            stringJoiner.add(users.getId() + users.getName());
+        }
+        return stringJoiner.toString();
     }
 }
 
