@@ -1,0 +1,20 @@
+server:
+  port: 11000
+
+spring:
+  application:
+    name: migration-dual-write
+
+  datasource:
+    remote:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://117.72.32.234:3306/remote_db?characterEncoding=utf8
+      username: root
+      password: Zz24270507..
+    local:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://localhost:3306/local_db?characterEncoding=utf8
+      username: root
+      password: '0507'
+mybatis-plus:
+  mapper-locations: classpath*:mapper/*.xml
