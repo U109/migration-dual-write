@@ -11,4 +11,6 @@ public interface UsersService extends IService<Users> {
     String createUser(String userName);
 
     String getAllUsers();
+
+    Users getUserById(Integer id);
 }

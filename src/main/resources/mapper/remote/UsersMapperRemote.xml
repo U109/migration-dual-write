@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zzz.migrationdualwrite.mapper.UsersMapper">
+
+    <resultMap id="BaseResultMap" type="com.zzz.migrationdualwrite.entity.Users">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id
+        ,name,email,
+        password
+    </sql>
+    <insert id="createUser" parameterType="com.zzz.migrationdualwrite.entity.Users">
+        insert into users (name, email, password)
+        values (CONCAT(#{user.name}, '_remote'), #{user.email}, #{user.password})
+    </insert>
+
+    <select id="getAllUsers" resultType="com.zzz.migrationdualwrite.entity.Users">
+        select
+        <include refid="Base_Column_List"/>
+        from users;
+    </select>
+</mapper>

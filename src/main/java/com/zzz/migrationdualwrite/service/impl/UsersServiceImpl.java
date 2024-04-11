@@ -41,6 +41,11 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         }
         return stringJoiner.toString();
     }
+
+    @Override
+    public Users getUserById(Integer id) {
+        return usersMapper.selectById(id);
+    }
 }
 
 

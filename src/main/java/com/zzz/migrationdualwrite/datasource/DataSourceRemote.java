@@ -2,10 +2,12 @@ package com.zzz.migrationdualwrite.datasource;
 
 import com.alibaba.druid.pool.xa.DruidXADataSource;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
+import com.zzz.migrationdualwrite.interceptors.DynamicDataSourceInterceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +36,9 @@ public class DataSourceRemote {
     @Value("${spring.datasource.remote.driver-class-name}")
     private String driverClassName;
 
+    @Autowired
+    private DynamicDataSourceInterceptor dynamicDataSourceInterceptor;
+
     /**
      * 创建remote_db数据源
      */
@@ -54,5 +59,32 @@ public class DataSourceRemote {
         properties.setProperty("com.atomikos.icatch.log_base_name", "remoteDataSource");
         ds.setXaProperties(properties);
         return ds;
+    }
+
+//    @Primary
+    @Bean(name = "remoteSqlSessionFactory")
+    public SqlSessionFactory remoteSqlSessionFactory(@Qualifier(value = "remoteDataSource") DataSource dataSource) throws Exception {
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        //设置数据源
+        sqlSessionFactoryBean.setDataSource(dataSource);
+        //设置别名
+        sqlSessionFactoryBean.setTypeAliasesPackage("com.zzz.migrationdualwrite.mapper.remote");
+        //设置驼峰
+        org.apache.ibatis.session.Configuration c = new org.apache.ibatis.session.Configuration();
+        c.setMapUnderscoreToCamelCase(true);
+        sqlSessionFactoryBean.setConfiguration(c);
+        //设置映射接口的xml配置文件
+        sqlSessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapper/remote/*.xml"));
+        sqlSessionFactoryBean.setPlugins(dynamicDataSourceInterceptor);
+        return sqlSessionFactoryBean.getObject();
+    }
+
+    /**
+     * 创建SqlSessionTemplate
+     */
+//    @Primary
+    @Bean(name = "remoteSqlSessionTemplate")
+    public SqlSessionTemplate remoteSqlSessionTemplate(@Qualifier("remoteSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
+        return new SqlSessionTemplate(sqlSessionFactory);
     }
 }

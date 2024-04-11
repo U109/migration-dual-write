@@ -18,7 +18,7 @@
     </sql>
     <insert id="createUser" parameterType="com.zzz.migrationdualwrite.entity.Users">
         insert into users (name, email, password)
-        values (#{user.name}, #{user.email}, #{user.password})
+        values (CONCAT(#{user.name}, '_local'), #{user.email}, #{user.password})
     </insert>
 
     <select id="getAllUsers" resultType="com.zzz.migrationdualwrite.entity.Users">
