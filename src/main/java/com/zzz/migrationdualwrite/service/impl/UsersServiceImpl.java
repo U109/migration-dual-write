@@ -1,12 +1,10 @@
 package com.zzz.migrationdualwrite.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zzz.migrationdualwrite.entity.Users;
 import com.zzz.migrationdualwrite.service.UsersService;
 import com.zzz.migrationdualwrite.mapper.UsersMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.StringJoiner;
@@ -15,12 +13,11 @@ import java.util.StringJoiner;
  * @author 张忠振
  */
 @Service
-public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements UsersService {
+public class UsersServiceImpl implements UsersService {
 
     @Autowired
     private UsersMapper usersMapper;
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public String createUser(String userName) {
         Users users = new Users();
@@ -33,7 +30,6 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Override
     public String getAllUsers() {
-
         List<Users> usersList = usersMapper.getAllUsers();
         StringJoiner stringJoiner = new StringJoiner(" || ");
         for (Users users : usersList) {
@@ -44,7 +40,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Override
     public Users getUserById(Integer id) {
-        return usersMapper.selectById(id);
+        return null;
     }
 }
 

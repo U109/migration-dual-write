@@ -39,6 +39,6 @@ public class UserController {
     @GetMapping("/queryCommon")
     public void queryCommon(){
         System.out.println(dataSourceCommonProperties.getUsername());
-
     }
+
 }

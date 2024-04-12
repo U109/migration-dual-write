@@ -16,5 +16,6 @@ spring:
       jdbc-url: jdbc:mysql://localhost:3306/local_db?characterEncoding=utf8
       username: root
       password: '0507'
-mybatis-plus:
+
+mybatis:
   mapper-locations: classpath*:mapper/*.xml

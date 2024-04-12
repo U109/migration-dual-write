@@ -1,7 +1,6 @@
 package com.zzz.migrationdualwrite.datasource;
 
-import com.alibaba.druid.pool.xa.DruidXADataSource;
-import com.atomikos.jdbc.AtomikosDataSourceBean;
+import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.zzz.migrationdualwrite.interceptors.DynamicDataSourceInterceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
@@ -17,7 +16,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import javax.sql.DataSource;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 
 /**
  * @author zhangzhongzhen wrote on 2024/3/2
@@ -25,8 +23,8 @@ import java.util.concurrent.Callable;
  * @description:
  */
 @Configuration
-@MapperScan(basePackages = {"com.zzz.migrationdualwrite.mapper"})
-public class DataSourceLocal  {
+@MapperScan(basePackages = {"com.zzz.migrationdualwrite.mapper"}, sqlSessionTemplateRef = "localSqlSessionTemplate")
+public class DataSourceLocal {
 
     @Value("${spring.datasource.local.jdbc-url}")
     private String url;
@@ -45,24 +43,17 @@ public class DataSourceLocal  {
      */
     @Bean(name = "localDataSource")
     @Primary
-    public DataSource createLocalDataSource() {
-        AtomikosDataSourceBean ds = new AtomikosDataSourceBean();
-        DruidXADataSource dds = new DruidXADataSource();
-        dds.setUsername(username);
-        dds.setPassword(password);
-        dds.setUrl(url);
-        dds.setDriverClassName(driverClassName);
-        ds.setXaDataSource(dds);
-        ds.setUniqueResourceName("localDataSource");
+    public DataSource createLocalDataSource() throws Exception {
         Properties properties = new Properties();
-        properties.setProperty("com.atomikos.icatch.log_base_dir", "/transactions-log/local/");
-        properties.setProperty("com.atomikos.icatch.log_base_name", "localDataSource");
-        ds.setXaProperties(properties);
-        return ds;
+        properties.setProperty("driverClassName", driverClassName);
+        properties.setProperty("url", url);
+        properties.setProperty("username", username);
+        properties.setProperty("password", password);
+        return DruidDataSourceFactory.createDataSource(properties);
     }
 
-    @Primary
     @Bean(name = "localSqlSessionFactory")
+    @Primary
     public SqlSessionFactory localSqlSessionFactory(@Qualifier(value = "localDataSource") DataSource dataSource) throws Exception {
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
         //设置数据源
@@ -82,8 +73,8 @@ public class DataSourceLocal  {
     /**
      * 创建SqlSessionTemplate
      */
-    @Primary
     @Bean(name = "localSqlSessionTemplate")
+    @Primary
     public SqlSessionTemplate localSqlSessionTemplate(@Qualifier("localSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
         return new SqlSessionTemplate(sqlSessionFactory);
     }

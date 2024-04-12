@@ -1,8 +1,9 @@
 package com.zzz.migrationdualwrite.datasource;
 
-import com.alibaba.druid.pool.xa.DruidXADataSource;
-import com.atomikos.jdbc.AtomikosDataSourceBean;
+import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.zzz.migrationdualwrite.interceptors.DynamicDataSourceInterceptor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -24,7 +25,8 @@ import java.util.Properties;
  * @description:
  */
 @Configuration
-@MapperScan(basePackages = {"com.zzz.migrationdualwrite.mapper"})
+@MapperScan(basePackages = {"com.zzz.migrationdualwrite.mapper"}, sqlSessionTemplateRef = "remoteSqlSessionTemplate")
+@Slf4j
 public class DataSourceRemote {
 
     @Value("${spring.datasource.remote.jdbc-url}")
@@ -36,37 +38,25 @@ public class DataSourceRemote {
     @Value("${spring.datasource.remote.driver-class-name}")
     private String driverClassName;
 
-    @Autowired
-    private DynamicDataSourceInterceptor dynamicDataSourceInterceptor;
-
     /**
      * 创建remote_db数据源
      */
     @Bean(name = "remoteDataSource")
-//    @Primary
-    public DataSource createRemoteDataSource() {
-        AtomikosDataSourceBean ds = new AtomikosDataSourceBean();
-        DruidXADataSource dds = new DruidXADataSource();
-        dds.setUsername(username);
-        dds.setPassword(password);
-        dds.setUrl(url);
-        dds.setDriverClassName(driverClassName);
-        ds.setXaDataSource(dds);
-        ds.setUniqueResourceName("remoteDataSource");
-        // Set Atomikos transaction log path and name
+    public DataSource createRemoteDataSource() throws Exception {
+        //创建数据源
         Properties properties = new Properties();
-        properties.setProperty("com.atomikos.icatch.log_base_dir", "/transactions-log/remote/");
-        properties.setProperty("com.atomikos.icatch.log_base_name", "remoteDataSource");
-        ds.setXaProperties(properties);
-        return ds;
+        properties.setProperty("driverClassName", driverClassName);
+        properties.setProperty("url", url);
+        properties.setProperty("username", username);
+        properties.setProperty("password", password);
+        return DruidDataSourceFactory.createDataSource(properties);
     }
 
-//    @Primary
     @Bean(name = "remoteSqlSessionFactory")
-    public SqlSessionFactory remoteSqlSessionFactory(@Qualifier(value = "remoteDataSource") DataSource dataSource) throws Exception {
+    public SqlSessionFactory remoteSqlSessionFactory(@Qualifier(value = "remoteDataSource") DataSource remoteDataSource) throws Exception {
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
         //设置数据源
-        sqlSessionFactoryBean.setDataSource(dataSource);
+        sqlSessionFactoryBean.setDataSource(remoteDataSource);
         //设置别名
         sqlSessionFactoryBean.setTypeAliasesPackage("com.zzz.migrationdualwrite.mapper.remote");
         //设置驼峰
@@ -75,14 +65,12 @@ public class DataSourceRemote {
         sqlSessionFactoryBean.setConfiguration(c);
         //设置映射接口的xml配置文件
         sqlSessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapper/remote/*.xml"));
-        sqlSessionFactoryBean.setPlugins(dynamicDataSourceInterceptor);
         return sqlSessionFactoryBean.getObject();
     }
 
     /**
      * 创建SqlSessionTemplate
      */
-//    @Primary
     @Bean(name = "remoteSqlSessionTemplate")
     public SqlSessionTemplate remoteSqlSessionTemplate(@Qualifier("remoteSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
         return new SqlSessionTemplate(sqlSessionFactory);
