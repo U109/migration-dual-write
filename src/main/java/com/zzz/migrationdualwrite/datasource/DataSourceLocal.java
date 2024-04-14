@@ -23,7 +23,7 @@ import java.util.Properties;
  * @description:
  */
 @Configuration
-@MapperScan(basePackages = {"com.zzz.migrationdualwrite.mapper"}, sqlSessionTemplateRef = "localSqlSessionTemplate")
+//@MapperScan(basePackages = {"com.zzz.migrationdualwrite.mapper"}, sqlSessionTemplateRef = "localSqlSessionTemplate")
 public class DataSourceLocal {
 
     @Value("${spring.datasource.local.jdbc-url}")
@@ -42,7 +42,7 @@ public class DataSourceLocal {
      * 创建local_db数据源
      */
     @Bean(name = "localDataSource")
-    @Primary
+//    @Primary
     public DataSource createLocalDataSource() throws Exception {
         Properties properties = new Properties();
         properties.setProperty("driverClassName", driverClassName);
@@ -53,7 +53,7 @@ public class DataSourceLocal {
     }
 
     @Bean(name = "localSqlSessionFactory")
-    @Primary
+//    @Primary
     public SqlSessionFactory localSqlSessionFactory(@Qualifier(value = "localDataSource") DataSource dataSource) throws Exception {
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
         //设置数据源
@@ -74,7 +74,7 @@ public class DataSourceLocal {
      * 创建SqlSessionTemplate
      */
     @Bean(name = "localSqlSessionTemplate")
-    @Primary
+//    @Primary
     public SqlSessionTemplate localSqlSessionTemplate(@Qualifier("localSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
         return new SqlSessionTemplate(sqlSessionFactory);
     }

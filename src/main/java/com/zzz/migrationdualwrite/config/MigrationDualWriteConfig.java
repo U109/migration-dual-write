@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class MigrationDualWriteConfig {
 
-    @Autowired
+    @Autowired //Field injection is not recommended
     @Qualifier("remoteSqlSessionFactory")
     private SqlSessionFactory remoteSqlSessionFactory;
 
@@ -37,7 +37,6 @@ public class MigrationDualWriteConfig {
             sqlSession.update(ms.getId(), parameter);
             // 提交事务
             sqlSession.commit();
-            log.info("remoteDataSource update success !");
         } catch (Exception e) {
             if (sqlSession != null) {
                 sqlSession.rollback();

@@ -25,7 +25,7 @@ import java.util.Properties;
  * @description:
  */
 @Configuration
-@MapperScan(basePackages = {"com.zzz.migrationdualwrite.mapper"}, sqlSessionTemplateRef = "remoteSqlSessionTemplate")
+//@MapperScan(basePackages = {"com.zzz.migrationdualwrite.mapper"}, sqlSessionTemplateRef = "remoteSqlSessionTemplate")
 @Slf4j
 public class DataSourceRemote {
 

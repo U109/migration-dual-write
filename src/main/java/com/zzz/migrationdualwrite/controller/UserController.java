@@ -1,7 +1,9 @@
 package com.zzz.migrationdualwrite.controller;
 
+import com.zzz.migrationdualwrite.aop.DataSourceSwitch;
 import com.zzz.migrationdualwrite.config.DataSourceCommonProperties;
 import com.zzz.migrationdualwrite.entity.Users;
+import com.zzz.migrationdualwrite.enums.DataSourceType;
 import com.zzz.migrationdualwrite.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +29,17 @@ public class UserController {
     }
 
     @GetMapping("/getAllUsers")
+    @DataSourceSwitch(DataSourceType.REMOTE_DATASOURCE)
     public String getAllUsers() {
         return usersService.getAllUsers();
     }
+
+    @GetMapping("/getLocalAllUsers")
+    @DataSourceSwitch(DataSourceType.REMOTE_DATASOURCE)
+    public String getLocalAllUsers() {
+        return usersService.getAllUsers();
+    }
+
 
     @GetMapping("/getUserById/{id}")
     public Users getUserById(@PathVariable("id") Integer id) {
@@ -37,7 +47,7 @@ public class UserController {
     }
 
     @GetMapping("/queryCommon")
-    public void queryCommon(){
+    public void queryCommon() {
         System.out.println(dataSourceCommonProperties.getUsername());
     }
 
